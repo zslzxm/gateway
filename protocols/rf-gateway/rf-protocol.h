@@ -20,6 +20,11 @@ extern "C" {
 #define CMD_SENSOR_UPGRADE      0x11
 #define CMD_DATA_UPLOAD         0x21
 
+enum {
+    RF_FAILURE = 0,
+    RF_SUCCESS,
+}
+
 /* define the structure */
 typedef struct {
     unsigned char   head;
@@ -28,7 +33,7 @@ typedef struct {
 }__attribute__((packed)) proto_head_t;
 
 typedef struct {
-    unsigned char   tail;
+    unsigned char   cs;
 }__attribute__((packed)) proto_tail_t;
 
 typedef struct {
@@ -57,6 +62,12 @@ typedef struct {
     unsigned short  reconnectinterval;
     unsigned short  paramtail;
     proto_tail_t tailer;
+}__attribute__((packed))  config_sensor_body_t;
+
+typedef struct {
+    proto_head_t header;
+    config_sensor_body_t body;
+    proto_tail_t tailer;
 }__attribute__((packed))  config_sensor_t;
 
 typedef struct {
@@ -66,7 +77,6 @@ typedef struct {
 }__attribute__((packed))  meas_def_t;
 
 typedef struct {
-    proto_head_t header;
     proto_time_t    servertime;
     proto_time_t    sampleparamtime;
     unsigned char   sampleparamver;
@@ -107,6 +117,11 @@ typedef struct {
     float           peakvalue2levelchangerate;
     unsigned char   alarmsamplecount;
     unsigned short  sensoruplodinterval;
+}__attribute__((packed))  config_baisc_param_body_t;
+
+typedef struct {
+    proto_head_t header;
+    config_baisc_param_body_t body;
     proto_tail_t tailer;
 }__attribute__((packed))  config_baisc_param_t;
 
@@ -135,7 +150,14 @@ typedef struct {
     float           highfreqtotalvaluealarmthreshold;
     // TODO
     proto_tail_t tailer;
+}__attribute__((packed))  config_ext_param_body_t;
+
+typedef struct {
+    proto_head_t header;
+    config_ext_param_body_t body;
+    proto_tail_t tailer;
 }__attribute__((packed))  config_ext_param_t;
+
 
 typedef struct {
     proto_head_t header;
@@ -175,7 +197,7 @@ typedef struct {
     proto_head_t header;
     unsigned char state;
     proto_tail_t tailer;
-}__attribute__((packed))  gateway_ret_t;
+}__attribute__((packed))  rf_common_ret_t;
 
 #ifdef  __cplusplus
 }
