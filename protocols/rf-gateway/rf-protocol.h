@@ -6,7 +6,7 @@ extern "C" {
 #endif
 #include "rf-op.h"
 
-/* Protocol: HEAD(1B)+CMD(1B)+LEN(4B)+DATA+CS(1B) */
+/* Protocol: HEAD(1B)+CMD(1B)+LEN(2B)+DATA+CS(1B) */
 
 /* define the head */
 #define HEAD_RF_TO_GATEWAY  0x56
@@ -24,7 +24,7 @@ extern "C" {
 typedef struct {
     unsigned char   head;
     unsigned char   cmd;
-    unsigned int    len;
+    unsigned short  len;
 }__attribute__((packed)) proto_head_t;
 
 typedef struct {
