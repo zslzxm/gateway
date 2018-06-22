@@ -105,3 +105,17 @@ int rf_config_ext_param(config_ext_param_body_t *b)
 {
     return __rf_config(b, sizeof(*b), CMD_CONFIG_EXT_PARAM);
 }
+
+int rf_upgrade(char *filename)
+{
+    int fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+        LOG_ERROR("open %s failed", filename);
+        return FAILURE;
+    }
+
+    
+
+    close(fd);
+    return SUCCESS;
+}
