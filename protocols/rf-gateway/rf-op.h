@@ -4,17 +4,16 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-#include "spi.h"
 
 enum {
     RF_INTERFACE_SPI = 0,
     RF_INTERFACE_UART,
-}
+};
 
 int rf_open(int interface);
 int rf_close();
-int rf_read(char *buf, int len);
-int rf_write(char *buf, int len);
+int rf_read(void *buf, int len);
+int rf_write(void *buf, int len);
 
 #ifdef  __cplusplus
 }

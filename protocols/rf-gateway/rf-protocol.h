@@ -20,10 +20,13 @@ extern "C" {
 #define CMD_SENSOR_UPGRADE      0x11
 #define CMD_DATA_UPLOAD         0x21
 
+/* define the default packet size */
+#define DEFAULT_PACKET_SIZE     1024
+
 enum {
     RF_FAILURE = 0,
     RF_SUCCESS,
-}
+};
 
 /* define the structure */
 typedef struct {
@@ -164,8 +167,8 @@ typedef struct {
     unsigned int    totalpackets;
     unsigned int    seqno;
     unsigned int    packetsize;
-    unsigned char   data[0];
-    //proto_tail_t tailer;
+    unsigned char   data[DEFAULT_PACKET_SIZE];
+    proto_tail_t    tailer;
 }__attribute__((packed))  rf_upgrade_t;
 
 typedef struct {
@@ -173,8 +176,8 @@ typedef struct {
     unsigned int    totalpackets;
     unsigned int    seqno;
     unsigned int    packetsize;
-    unsigned char   data[0];
-    //proto_tail_t tailer;
+    unsigned char   data[DEFAULT_PACKET_SIZE];
+    proto_tail_t    tailer;
 }__attribute__((packed))  sensor_upgrade_t;
 
 typedef struct {
@@ -189,8 +192,8 @@ typedef struct {
     unsigned int    totalpackets;
     unsigned int    seqno;
     unsigned int    packetsize;
-    unsigned char   data[0];
-    //proto_tail_t tailer;
+    unsigned char   data[DEFAULT_PACKET_SIZE];
+    proto_tail_t tailer;
 }__attribute__((packed))  data_upload_t;
 
 typedef struct {

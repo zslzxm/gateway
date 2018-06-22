@@ -1,3 +1,6 @@
+#include "spi.h"
+#include "common.h"
+#include <linux/spi/spidev.h>
 
 int spi_write(int fd, char *buf, int len)
 {
