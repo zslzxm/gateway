@@ -50,7 +50,7 @@ static int __rf_return_check(rf_common_ret_t *r, int cmd)
     return SUCCESS;
 }
 
-static int __rf_config(void *body, int len, int cmd)
+static int __rf_send_cmd(void *body, int len, int cmd)
 {
     char buffer[1024];
     proto_head_t *h;
@@ -92,22 +92,22 @@ static int __rf_config(void *body, int len, int cmd)
 
 int rf_config_sensor(config_sensor_body_t *b)
 {
-    return __rf_config(b, sizeof(*b), CMD_CONFIG_SENSOR);
+    return __rf_send_cmd(b, sizeof(*b), CMD_CONFIG_SENSOR);
 }
 
 int rf_config_basic_param(config_baisc_param_body_t *b)
 {
-    return __rf_config(b, sizeof(*b), CMD_CONFIG_BASIC_PARAM);
+    return __rf_send_cmd(b, sizeof(*b), CMD_CONFIG_BASIC_PARAM);
 }
 
 int rf_config_ext_param(config_ext_param_body_t *b)
 {
-    return __rf_config(b, sizeof(*b), CMD_CONFIG_EXT_PARAM);
+    return __rf_send_cmd(b, sizeof(*b), CMD_CONFIG_EXT_PARAM);
 }
 
 int rf_upgrade(char *filename)
 {
-    rf_upgrade_t up;
+    rf_upgrade_body_t up;
     int totalsize;
     int fd = open(filename, O_RDONLY);
     if (fd < 0) {
@@ -116,10 +116,6 @@ int rf_upgrade(char *filename)
     }
 
     memset(&up, 0, sizeof(up));
-    up.header.head = HEAD_GATEWAY_TO_RF;
-    up.header.cmd = CMD_RF_UPGRADE;
-    up.header.len = sizeof(up);
-
     totalsize = get_file_size(filename);
     up.totalpackets = totalsize / DEFAULT_PACKET_SIZE;
     if (totalsize % DEFAULT_PACKET_SIZE)
@@ -132,8 +128,15 @@ int rf_upgrade(char *filename)
         if (up.seqno == up.totalpackets)
             /* last packet */
             up.packetsize = totalsize - (up.totalpackets - 1) * DEFAULT_PACKET_SIZE;
-        read(fd, up.data, up.packetsize);
+        if (read_exactly(fd, up.data, up.packetsize) != (int)up.packetsize)
+            LOG_ERROR("read error");
         calc_cs(&up, sizeof(up));
+
+        if (__rf_send_cmd(&up, sizeof(up), CMD_RF_UPGRADE) != SUCCESS) {
+            LOG_ERROR("failed to send packe: %d, size: %d", up.seqno, up.packetsize);
+            close(fd);
+            return FAILURE;
+        }
     }
 
     close(fd);

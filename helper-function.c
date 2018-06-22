@@ -11,3 +11,33 @@ unsigned long get_file_size(char *path)
         filesize = statbuff.st_size;
     return filesize;
 }
+
+int read_exactly(int fd, void *buffer, int len)
+{
+    int n = 0, rc;
+    char *p = (char *)buffer;
+
+    while (n != len) {
+        rc = read(fd, p, len - n);
+        if (rc <= 0)
+            return rc;
+        n += rc;
+        p += rc;
+    }
+    return n;
+}
+
+int write_exactly(int fd, void *buffer, int len)
+{
+    int n = 0, rc;
+    char *p = (char *)buffer;
+
+    while (n != len) {
+        rc = write(fd, p, len - n);
+        if (rc <= 0)
+            return rc;
+        n += rc;
+        p += rc;
+    }
+    return n;
+}

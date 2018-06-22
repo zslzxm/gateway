@@ -161,22 +161,29 @@ typedef struct {
     proto_tail_t tailer;
 }__attribute__((packed))  config_ext_param_t;
 
-
 typedef struct {
-    proto_head_t header;
     unsigned int    totalpackets;
     unsigned int    seqno;
     unsigned int    packetsize;
     unsigned char   data[DEFAULT_PACKET_SIZE];
+}__attribute__((packed))  rf_upgrade_body_t;
+
+typedef struct {
+    proto_head_t header;
+    rf_upgrade_body_t body;
     proto_tail_t    tailer;
 }__attribute__((packed))  rf_upgrade_t;
 
 typedef struct {
-    proto_head_t header;
     unsigned int    totalpackets;
     unsigned int    seqno;
     unsigned int    packetsize;
     unsigned char   data[DEFAULT_PACKET_SIZE];
+}__attribute__((packed))  sensor_upgrade__body_t;
+
+typedef struct {
+    proto_head_t header;
+    sensor_upgrade__body_t body;
     proto_tail_t    tailer;
 }__attribute__((packed))  sensor_upgrade_t;
 
