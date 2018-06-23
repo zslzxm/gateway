@@ -1,6 +1,21 @@
 #include <sys/stat.h>
 #include "common.h"
 
+void dump_memory(void *buf, int len)
+{
+    unsigned char *d = (unsigned char *)buf;
+    if (!d || !len)
+        return;
+    for (int i = 0; i < len; i++) {
+        printf(" %02x", d[i]);
+        if (((i + 1) % 8) == 0)
+            printf("\n");
+    }
+
+    if (len % 8)
+        printf("\n");
+}
+
 unsigned long get_file_size(char *path)
 {
     unsigned long filesize = -1;

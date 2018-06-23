@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+void dump_memory(void *buf, int len);
 unsigned long get_file_size(char *path);
 int read_exactly(int fd, void *buffer, int len);
 int write_exactly(int fd, void *buffer, int len);
