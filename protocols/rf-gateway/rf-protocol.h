@@ -23,6 +23,8 @@ extern "C" {
 /* define the default packet size */
 #define DEFAULT_PACKET_SIZE     1024
 
+#define MAX_BODY_SIZE   (256 + DEFAULT_PACKET_SIZE)
+
 enum {
     RF_FAILURE = 0,
     RF_SUCCESS,
@@ -179,16 +181,15 @@ typedef struct {
     unsigned int    seqno;
     unsigned int    packetsize;
     unsigned char   data[DEFAULT_PACKET_SIZE];
-}__attribute__((packed))  sensor_upgrade__body_t;
+}__attribute__((packed))  sensor_upgrade_body_t;
 
 typedef struct {
     proto_head_t header;
-    sensor_upgrade__body_t body;
+    sensor_upgrade_body_t body;
     proto_tail_t    tailer;
 }__attribute__((packed))  sensor_upgrade_t;
 
 typedef struct {
-    proto_head_t header;
     unsigned char   sensortype;
     unsigned char   channelno;
     proto_time_t    sampleparamtime;
@@ -200,8 +201,13 @@ typedef struct {
     unsigned int    seqno;
     unsigned int    packetsize;
     unsigned char   data[DEFAULT_PACKET_SIZE];
+}__attribute__((packed))  rf_data_upload_body_t;
+
+typedef struct {
+    proto_head_t header;
+    rf_data_upload_body_t body;
     proto_tail_t tailer;
-}__attribute__((packed))  data_upload_t;
+}__attribute__((packed))  rf_data_upload_t;
 
 typedef struct {
     proto_head_t header;

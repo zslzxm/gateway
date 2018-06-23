@@ -156,3 +156,114 @@ int rf_upgrade(char *filename)
     close(fd);
     return SUCCESS;
 }
+
+static int __read_rf_ack(void *head, void *body, void *tail)
+{
+    proto_head_t *h = (proto_head_t *)head;
+    char *b = (char *)body;
+    proto_tail_t *t = (proto_tail_t *)tail;
+    int rc, size, i;
+    unsigned char cs = 0;
+    char *p;
+
+    /* read the head */
+    size = (int)sizeof(proto_head_t);
+    rc = rf_read(h, size);
+    if (rc != size) {
+        LOG_ERROR("read head failed, expect %d, but %d", size, rc);
+        return FAILURE;
+    }
+
+    /* sanity check */
+    if (h->head != HEAD_RF_TO_GATEWAY) {
+        LOG_ERROR("illegal head: 0x%x", h->head);
+        return FAILURE;
+    }
+
+    /* calc the cs for head */
+    p = (char *)h;
+    for (i = 0; i < (int)sizeof(proto_head_t); i++)
+        cs += p[i];
+
+    /* read the body */
+    size = h->len - sizeof(proto_head_t) - sizeof(proto_tail_t);
+    rc = rf_read(b, size);
+    if (rc != size) {
+        LOG_ERROR("read body failed, expect %d, but %d", size, rc);
+        return FAILURE;
+    }
+
+    /* calc the cs for head & body */
+    p = (char *)b;
+    for (i = 0; i < size; i++)
+        cs += p[i];
+
+    /* read the tail */
+    size = (int)sizeof(proto_tail_t);
+    rc = rf_read(t, size);
+    if (rc != size) {
+        LOG_ERROR("read tail failed, expect %d, but %d", size, rc);
+        return FAILURE;
+    }
+
+    /* check the cs */
+    if ((cs + t->cs) != 0) {
+        LOG_ERROR("check cs failed, cs: 0x%x, t.cs: 0x%x", cs, t->cs);
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+static int __handle_rf_data_upload(void *body)
+{
+    rf_data_upload_body_t *b = (rf_data_upload_body_t *)body;
+    LOG_INFO("SensorType: %d, ChannelNo: %d, SampleParamTime: %04d-%02d-%02d %02d:%02d:%02d, "
+             "SampleParamVer: %d, SampleTime: %04d-%02d-%02d %02d:%02d:%02d, "
+             "DataType: %d, Accoe: %f, TotalPackets: %d, Seq: %d, PacketSize: %d",
+             b->sensortype, b->channelno,
+             b->sampleparamtime.year, b->sampleparamtime.mon, b->sampleparamtime.day,
+             b->sampleparamtime.hour, b->sampleparamtime.min, b->sampleparamtime.sec,
+             b->sampleparamver,
+             b->sampletime.year, b->sampletime.mon, b->sampletime.day,
+             b->sampletime.hour, b->sampletime.min, b->sampletime.sec,
+             b->datatype, b->accoe, b->totalpackets, b->seqno, b->packetsize);
+    /* ack the rf */
+    // TODO
+    return SUCCESS;
+}
+
+int handle_rf_ack()
+{
+    proto_head_t h;
+    proto_tail_t t;
+    char body[MAX_BODY_SIZE];
+    int rc = FAILURE;
+
+    if (__read_rf_ack(&h, body, &t) != SUCCESS) {
+        LOG_ERROR("read rf ack failed");
+        return FAILURE;
+    }
+
+    switch (h.cmd) {
+    case CMD_CONFIG_SENSOR:
+        break;
+    case CMD_CONFIG_BASIC_PARAM:
+        break;
+    case CMD_CONFIG_EXT_PARAM:
+        break;
+    case CMD_RF_UPGRADE:
+        break;
+    case CMD_SENSOR_UPGRADE:
+        break;
+    case CMD_DATA_UPLOAD:
+        rc = __handle_rf_data_upload(body);
+        break;
+    default:
+        LOG_ERROR("unknown cmd: 0x%x", h.cmd);
+        rc = FAILURE;
+        break;
+    }
+
+    return rc;
+}
