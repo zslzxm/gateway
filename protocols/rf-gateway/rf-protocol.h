@@ -209,6 +209,11 @@ typedef struct {
     proto_tail_t tailer;
 }__attribute__((packed))  rf_common_ret_t;
 
+int rf_config_sensor(config_sensor_body_t *b);
+int rf_config_basic_param(config_baisc_param_body_t *b);
+int rf_config_ext_param(config_ext_param_body_t *b);
+int rf_upgrade(char *filename);
+
 #ifdef  __cplusplus
 }
 #endif  /* end of __cplusplus */

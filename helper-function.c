@@ -6,6 +6,7 @@ void dump_memory(void *buf, int len)
     unsigned char *d = (unsigned char *)buf;
     if (!d || !len)
         return;
+
     for (int i = 0; i < len; i++) {
         printf(" %02x", d[i]);
         if (((i + 1) % 8) == 0)

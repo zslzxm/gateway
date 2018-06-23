@@ -1,6 +1,8 @@
 #include "rf-protocol.h"
 #include "common.h"
 
+#define RF_DEBUG
+
 static void calc_cs(void *buf, int len)
 {
     unsigned char *p = (unsigned char *)buf;
@@ -52,7 +54,7 @@ static int __rf_return_check(rf_common_ret_t *r, int cmd)
 
 static int __rf_send_cmd(void *body, int len, int cmd)
 {
-    char buffer[1024];
+    char buffer[128 + DEFAULT_PACKET_SIZE];
     proto_head_t *h;
     char *b;
     rf_common_ret_t r;
@@ -72,6 +74,15 @@ static int __rf_send_cmd(void *body, int len, int cmd)
     memcpy(b, body, len);
     /* init tailer */
     calc_cs(h, h->len);
+
+#ifdef RF_DEBUG
+    LOG_INFO("Dump header:");
+    dump_memory(h, sizeof(proto_head_t));
+    LOG_INFO("Dump body:");
+    dump_memory(b, len);
+    LOG_INFO("Dump tailer:");
+    dump_memory(b + len, sizeof(proto_tail_t));
+#endif
 
     /* send cmd to rf */
     if (SUCCESS != rf_write(h, h->len)) {
@@ -131,6 +142,9 @@ int rf_upgrade(char *filename)
         if (read_exactly(fd, up.data, up.packetsize) != (int)up.packetsize)
             LOG_ERROR("read error");
         calc_cs(&up, sizeof(up));
+#ifdef RF_DEBUG
+        LOG_INFO("Seq: %d, Size: %d", up.seqno, up.packetsize);
+#endif
 
         if (__rf_send_cmd(&up, sizeof(up), CMD_RF_UPGRADE) != SUCCESS) {
             LOG_ERROR("failed to send packe: %d, size: %d", up.seqno, up.packetsize);
